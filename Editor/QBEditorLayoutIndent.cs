@@ -7,20 +7,20 @@ using UnityEditor;
 namespace QuickBuild
 {
 
-	public class QBEditorLayoutIndent : IDisposable
-	{
-		public QBEditorLayoutIndent()
-		{
-			++EditorGUI.indentLevel;
-		}
-		
-		#region IDisposable implementation
-		public void Dispose()
-		{
-			--EditorGUI.indentLevel;
-		}
-		#endregion
-		
-	}
+    public class QBEditorLayoutIndent : IDisposable
+    {
+        public QBEditorLayoutIndent()
+        {
+            ++EditorGUI.indentLevel;
+        }
+        
+        #region IDisposable implementation
+        public void Dispose()
+        {
+            --EditorGUI.indentLevel;
+        }
+        #endregion
+        
+    }
 
 }
