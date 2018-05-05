@@ -12,37 +12,37 @@ namespace QuickBuild
     {
         public event Action<QBProcess> OnProcessCompleted;
 
-        Thread thread;
-        Process process;
-        ProcessStartInfo processStartInfo;
-        int instanceID;
+        private Thread _thread;
+        private Process _process;
+        private ProcessStartInfo _processStartInfo;
+        private int _instanceID;
 
         private const string QBMessageFormatPrefix = "<b>[QB:{0}]</b> {1}";
         
-        public QBProcess(string BuildPath, QBEditorSettings EditorSettings, QBPlayerSettings PlayerSettings, int InstanceID)
+        public QBProcess(string buildPath, QBProfile editorSettings, QBPlayerSettings playerSettings, int instanceID)
         {
-            instanceID = InstanceID;
+            _instanceID = instanceID;
 
-            processStartInfo = new ProcessStartInfo();
-            processStartInfo.UseShellExecute = false;
+            _processStartInfo = new ProcessStartInfo();
+            _processStartInfo.UseShellExecute = false;
 //			processStartInfo.RedirectStandardOutput = EditorSettings.RedirectOutputLog;
-            processStartInfo.FileName = BuildPath;
-            processStartInfo.Arguments = BuildCommandLineArguments(EditorSettings, PlayerSettings, InstanceID);
+            _processStartInfo.FileName = buildPath;
+            _processStartInfo.Arguments = BuildCommandLineArguments(editorSettings, playerSettings, instanceID);
 
-            UnityEngine.Debug.Log("Command line arguments : " + processStartInfo.Arguments);
+            UnityEngine.Debug.Log("Command line arguments : " + _processStartInfo.Arguments);
         }
 
         public void	Start()
         {
             Kill();
 
-            thread = new Thread(ProcessWorker);
-            thread.Start();
+            _thread = new Thread(ProcessWorker);
+            _thread.Start();
         }
 
         void ProcessWorker(object param)
         {
-            process = Process.Start(processStartInfo);
+            _process = Process.Start(_processStartInfo);
 //			process.EnableRaisingEvents = true;
 //			process.OutputDataReceived += HandleOutputDataReceived;
 //			process.Exited += HandleProcessExited;
@@ -58,7 +58,7 @@ namespace QuickBuild
             if (QBMessagePacker.UnpackMessage(e.Data, out condition, out stackTrace, out logType))
             {
                 string messageContent = string.Format("{0}{1}<i>{2}</i>", condition, System.Environment.NewLine, stackTrace);
-                string message = string.Format(QBMessageFormatPrefix, instanceID, messageContent);
+                string message = string.Format(QBMessageFormatPrefix, _instanceID, messageContent);
                 switch (logType)
                 {
                     case LogType.Log:
@@ -76,44 +76,44 @@ namespace QuickBuild
             }
             else
             {
-                UnityEngine.Debug.Log(string.Format(QBMessageFormatPrefix, instanceID, e.Data));
+                UnityEngine.Debug.Log(string.Format(QBMessageFormatPrefix, _instanceID, e.Data));
             }
         }
 
         void HandleProcessExited (object sender, EventArgs e)
         {
-            process = null;
+            _process = null;
         }
 
         public void Kill()
         {
-            if (thread != null && thread.IsAlive)
+            if (_thread != null && _thread.IsAlive)
             {
-                thread.Abort();
-                thread = null;
+                _thread.Abort();
+                _thread = null;
             }
 
-            if (process != null)
+            if (_process != null)
             {
-                process.Kill();
+                _process.Kill();
             }
         }
 
-        private string	BuildCommandLineArguments(QBEditorSettings EditorSettings, QBPlayerSettings PlayerSettings, int InstanceID)
+        private string	BuildCommandLineArguments(QBProfile editorProfile, QBPlayerSettings playerSettings, int instanceID)
         {
             StringBuilder sb = new StringBuilder();
 
             AddCommandLineArgument(sb, QBCommandLineParameters.EnableQuickBuild);
-            AddCommandLineArgument(sb, QBCommandLineParameters.InstanceID, InstanceID);
+            AddCommandLineArgument(sb, QBCommandLineParameters.InstanceID, instanceID);
              
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_FullscreenMode, EditorSettings.screenSettings.isFullScreen ? 1 : 0); 
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Width, EditorSettings.screenSettings.screenWidth);
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Height, EditorSettings.screenSettings.screenHeight);
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_FullscreenMode, editorProfile.advancedSettings.screenSettings.isFullScreen ? 1 : 0); 
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Width, editorProfile.advancedSettings.screenSettings.screenWidth);
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Height, editorProfile.advancedSettings.screenSettings.screenHeight);
 
             string outputLogFileName = string.Empty;
-            if (!EditorSettings.redirectOutputLog)
+            if (!editorProfile.advancedSettings.redirectOutputLog)
             {
-                outputLogFileName = EditorSettings.BuildDirectoryPath + "/" + string.Format(QBCommandLineParameters.LogFileFormat, InstanceID);
+                outputLogFileName = editorProfile.BuildDirectoryPath + "/" + string.Format(QBCommandLineParameters.LogFileFormat, instanceID);
                 AddCommandLineArgument(sb, QBCommandLineParameters.LogFile, outputLogFileName);
             }
             else
@@ -121,20 +121,20 @@ namespace QuickBuild
                 AddCommandLineArgument(sb, QBCommandLineParameters.RedirectOutput);
             }
 
-            if (EditorSettings.launchInBatchMode)
+            if (editorProfile.expertSettings.launchInBatchMode)
             {
                 AddCommandLineArgument(sb, QBCommandLineParameters.Batchmode);
                 AddCommandLineArgument(sb, QBCommandLineParameters.NoGraphics);
             }
 
-            if (EditorSettings.displayInstanceID)
+            if (editorProfile.advancedSettings.displayInstanceID)
             {
                 AddCommandLineArgument(sb, QBCommandLineParameters.DisplayInstanceID);
             }
 
-            if (PlayerSettings.AdditiveScenes.Length > 0)
+            if (playerSettings.AdditiveScenes.Length > 0)
             {
-                AddCommandLineArgument(sb, QBCommandLineParameters.AdditiveScenes, QBCommandLineHelper.PackStringArray(PlayerSettings.AdditiveScenes));
+                AddCommandLineArgument(sb, QBCommandLineParameters.AdditiveScenes, QBCommandLineHelper.PackStringArray(playerSettings.AdditiveScenes));
             }
 
             return (sb.ToString());

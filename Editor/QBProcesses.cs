@@ -11,46 +11,46 @@ namespace QuickBuild
 //		public event Action<QBProcess> OnProcessCompleted;
 //		public event Action	OnAllProcessesCompleted;
         
-        List<QBProcess> processes;
+        private List<QBProcess> _processes;
 
         public QBProcesses()
         {
-            processes = new List<QBProcess>();
+            _processes = new List<QBProcess>();
         }
 
-        public void	StartNewProcess(string BuildPath, QBEditorSettings EditorSettings, QBPlayerSettings PlayerSettings, int NumProcess = 1)
+        public void	StartNewProcess(string buildPath, QBProfile editorProfile, QBPlayerSettings playerSettings, int numProcess = 1)
         {
-            for (int processIndex = 0; processIndex < NumProcess; ++processIndex)
+            for (int processIndex = 0; processIndex < numProcess; ++processIndex)
             {
-                StartNewSoloProcess(BuildPath, EditorSettings, PlayerSettings, processIndex);
+                StartNewSoloProcess(buildPath, editorProfile, playerSettings, processIndex);
             }
         }
 
-        void StartNewSoloProcess(string BuildPath, QBEditorSettings EditorSettings, QBPlayerSettings PlayerSettings, int ProcessID)
+        void StartNewSoloProcess(string BuildPath, QBProfile editorSettings, QBPlayerSettings PlayerSettings, int ProcessID)
         {
-            QBProcess process = new QBProcess(BuildPath, EditorSettings, PlayerSettings, ProcessID);
+            QBProcess process = new QBProcess(BuildPath, editorSettings, PlayerSettings, ProcessID);
             process.OnProcessCompleted += HandleProcessCompleted;;
-            processes.Add(process);
+            _processes.Add(process);
             process.Start();
         }
 
         public void StopAllProcesses()
         {
-            for (int i = 0; i < processes.Count; ++i)
+            for (int i = 0; i < _processes.Count; ++i)
             {
-                processes[i].Kill();
+                _processes[i].Kill();
             }
-            processes.Clear();
+            _processes.Clear();
         }
 
         public int	GetNumRunningProcesses()
         {
-            return (processes.Count);
+            return (_processes.Count);
         }
 
         void HandleProcessCompleted(QBProcess Process)
         {
-            processes.Remove(Process);
+            _processes.Remove(Process);
         }
     }
 

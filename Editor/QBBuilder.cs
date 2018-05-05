@@ -12,7 +12,7 @@ namespace QuickBuild
 {
     public class QBBuilder
     {		
-        public bool	BuildAndPlayCurrentScenes(QBEditorSettings Settings)
+        public bool	BuildAndPlayCurrentScenes(QBProfile profile)
         {
             string[] scenes = GetSceneNames();
 
@@ -20,7 +20,7 @@ namespace QuickBuild
 
             if (scenes.Length > 0)
             {
-                string path = Settings.ExecutablePath;
+                string path = profile.ExecutablePath;
                 ThrowIfBuildPathInvalid(path);
 
                 using (new QBBuildSettingsPreserveContext())
@@ -29,7 +29,7 @@ namespace QuickBuild
                     PlayerSettings.displayResolutionDialog = ResolutionDialogSetting.HiddenByDefault;
 
                     EditorBuildSettings.scenes = GetEditorBuildSettingsScenes();
-                    BuildPlayerOptions buildPlayerOptions = GetBuildPlayerOptions(Settings, path, scenes);
+                    BuildPlayerOptions buildPlayerOptions = GetBuildPlayerOptions(profile, path, scenes);
 
                     Profiler.BeginSample("Quick Build - Build operation");
                     string result = BuildPipeline.BuildPlayer(buildPlayerOptions);
@@ -42,22 +42,22 @@ namespace QuickBuild
             return (false);
         }
 
-        BuildPlayerOptions	GetBuildPlayerOptions(QBEditorSettings settings, string BuildPath, string[] SceneNames)
+        BuildPlayerOptions	GetBuildPlayerOptions(QBProfile profile, string buildPath, string[] sceneNames)
         {
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions() {
-                locationPathName = BuildPath,
-                scenes = SceneNames,
+                locationPathName = buildPath,
+                scenes = sceneNames,
                 options = BuildOptions.UncompressedAssetBundle,
                 target = EditorUserBuildSettings.selectedStandaloneTarget,
                 targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup
             };
 
-            if (settings.allowDebugging)
+            if (profile.expertSettings.allowDebugging)
             {
                 buildPlayerOptions.options |= BuildOptions.Development | BuildOptions.AllowDebugging;
             }
 
-            if (settings.buildScriptsOnly)
+            if (profile.buildScriptsOnly)
             {
                 buildPlayerOptions.options |= BuildOptions.Development | BuildOptions.BuildScriptsOnly;
             }
