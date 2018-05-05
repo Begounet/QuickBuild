@@ -203,15 +203,16 @@ namespace QuickBuild
                 int width, height;
                 _profile.GetScreenSizeForInstance(_instanceID, out width, out height);
 				IntPtr id = GetForegroundWindow();
-				bool repaint = true;
 
 				UnityEngine.Debug.LogFormat("Move window [{0}, {1}, {2}, {3}]", instanceData.screenPosition.X, instanceData.screenPosition.Y, width, height);
-//                QBProcess.MoveWindow(
-//                    id, 
-//                    instanceData.screenPosition.X, instanceData.screenPosition.Y,
-//                    width, height,
-//                    repaint
-//                    );
+//				bool repaint = true;
+//              QBProcess.MoveWindow(
+//                  id, 
+//                  instanceData.screenPosition.X, instanceData.screenPosition.Y,
+//                  width, height,
+//                  repaint
+//                  );
+
 				bool result = QBProcess.SetWindowPos(
 					id,
 					instanceData.screenPosition.X, instanceData.screenPosition.Y,
