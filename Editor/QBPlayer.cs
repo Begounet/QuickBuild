@@ -17,7 +17,7 @@ namespace QuickBuild
 
         public void	RunBuilds(QBEditorSettings Settings)
         {
-            processes.StartNewProcess(Settings.ExecutablePath, Settings, GeneratePlayerSettings(), Settings.NumInstances);
+            processes.StartNewProcess(Settings.ExecutablePath, Settings, GeneratePlayerSettings(), Settings.numInstances);
         }
 
         QBPlayerSettings	GeneratePlayerSettings()

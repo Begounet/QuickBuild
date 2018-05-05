@@ -42,7 +42,7 @@ namespace QuickBuild
             return (false);
         }
 
-        BuildPlayerOptions	GetBuildPlayerOptions(QBEditorSettings Settings, string BuildPath, string[] SceneNames)
+        BuildPlayerOptions	GetBuildPlayerOptions(QBEditorSettings settings, string BuildPath, string[] SceneNames)
         {
             BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions() {
                 locationPathName = BuildPath,
@@ -52,12 +52,12 @@ namespace QuickBuild
                 targetGroup = EditorUserBuildSettings.selectedBuildTargetGroup
             };
 
-            if (Settings.AllowDebugging)
+            if (settings.allowDebugging)
             {
                 buildPlayerOptions.options |= BuildOptions.Development | BuildOptions.AllowDebugging;
             }
 
-            if (Settings.BuildScriptsOnly)
+            if (settings.buildScriptsOnly)
             {
                 buildPlayerOptions.options |= BuildOptions.Development | BuildOptions.BuildScriptsOnly;
             }

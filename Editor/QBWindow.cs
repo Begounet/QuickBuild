@@ -9,6 +9,7 @@ using UnityEngine.Profiling;
 using System.Threading;
 
 using SDiag = System.Diagnostics;
+using System;
 
 namespace QuickBuild
 {
@@ -18,6 +19,7 @@ namespace QuickBuild
         QBBuilder builder;
         QBPlayer player;
         QBEditorSettings settings;
+        QBProfile profile;
 
         Vector2 mainScrollViewPosition;
 
@@ -45,13 +47,30 @@ namespace QuickBuild
         void	OnGUI()
         {
             DrawBuildButtons();
-
             GUILayout.Space(10);
-            mainScrollViewPosition = GUILayout.BeginScrollView(mainScrollViewPosition);
+            DrawQBProfile();
+        }
+
+        private void DrawQBProfile()
+        {
+            profile = (QBProfile)EditorGUILayout.ObjectField(profile, typeof(QBProfile), false);
+
+            if (profile != null)
             {
-                DrawBuildSettings();
+                SerializedObject serializedProfile = new SerializedObject(profile);
+
+                SerializedProperty props = serializedProfile.GetIterator();
+                props.NextVisible(true);
+                while (props.NextVisible(false))
+                {
+                    EditorGUILayout.PropertyField(props, true);
+                }
+
+                if (serializedProfile.ApplyModifiedProperties())
+                {
+                    serializedProfile.UpdateIfRequiredOrScript();
+                }
             }
-            GUILayout.EndScrollView();
         }
 
         void	DrawBuildButtons()
@@ -66,11 +85,11 @@ namespace QuickBuild
         }
         void	DrawBuildSettings()
         {
-            settings.NumInstances = EditorGUILayout.IntField("Number of instances", settings.NumInstances);
-            settings.BuildScriptsOnly = EditorGUILayout.Toggle("Build Scripts Only", settings.BuildScriptsOnly);
+            settings.numInstances = EditorGUILayout.IntField("Number of instances", settings.numInstances);
+            settings.buildScriptsOnly = EditorGUILayout.Toggle("Build Scripts Only", settings.buildScriptsOnly);
             
-            settings.AdvancedSettingsFoldout = EditorGUILayout.Foldout(settings.AdvancedSettingsFoldout, "Advanced Settings");
-            if (settings.AdvancedSettingsFoldout)
+            settings.advancedSettingsFoldout = EditorGUILayout.Foldout(settings.advancedSettingsFoldout, "Advanced Settings");
+            if (settings.advancedSettingsFoldout)
             {
                 using (new QBEditorLayoutIndent())
                 {
@@ -81,21 +100,21 @@ namespace QuickBuild
 
         void	DrawAdvancedSettings()
         {
-            settings.ScreenSettingsFoldout = EditorGUILayout.Foldout(settings.ScreenSettingsFoldout, "Screen");
-            if (settings.ScreenSettingsFoldout)
+            settings.screenSettingsFoldout = EditorGUILayout.Foldout(settings.screenSettingsFoldout, "Screen");
+            if (settings.screenSettingsFoldout)
             {
                 using (new QBEditorLayoutIndent())
                 {
-                    settings.ScreenSettings.IsFullScreen = EditorGUILayout.Toggle("Is Fullscreen ?", settings.ScreenSettings.IsFullScreen);
-                    settings.ScreenSettings.ScreenWidth = EditorGUILayout.IntField("Width", settings.ScreenSettings.ScreenWidth);
-                    settings.ScreenSettings.ScreenHeight = EditorGUILayout.IntField("Height", settings.ScreenSettings.ScreenHeight);
+                    settings.screenSettings.isFullScreen = EditorGUILayout.Toggle("Is Fullscreen ?", settings.screenSettings.isFullScreen);
+                    settings.screenSettings.screenWidth = EditorGUILayout.IntField("Width", settings.screenSettings.screenWidth);
+                    settings.screenSettings.screenHeight = EditorGUILayout.IntField("Height", settings.screenSettings.screenHeight);
                 }
             }
 
-            settings.DisplayInstanceID = EditorGUILayout.Toggle(new GUIContent("Display Instance ID", "Display the instance ID on the opened window so you can identify the player"), settings.DisplayInstanceID);
+            settings.displayInstanceID = EditorGUILayout.Toggle(new GUIContent("Display Instance ID", "Display the instance ID on the opened window so you can identify the player"), settings.displayInstanceID);
 
             GUI.enabled = false;
-            settings.RedirectOutputLog = EditorGUILayout.Toggle(new GUIContent("Redirect output log", "!! Not working now !! - If true, redirect the output to the opened Unity Editor. Otherwise, log into separate files in the build directory."), false/*settings.RedirectOutputLog*/);
+            settings.redirectOutputLog = EditorGUILayout.Toggle(new GUIContent("Redirect output log", "!! Not working now !! - If true, redirect the output to the opened Unity Editor. Otherwise, log into separate files in the build directory."), false/*settings.RedirectOutputLog*/);
             GUI.enabled = true;
 
             EditorGUILayout.BeginHorizontal();
@@ -112,8 +131,8 @@ namespace QuickBuild
             }
             EditorGUILayout.EndHorizontal();
 
-            settings.ExpertSettingsFoldout = EditorGUILayout.Foldout(settings.ExpertSettingsFoldout, "Expert Settings");
-            if (settings.ExpertSettingsFoldout)
+            settings.expertSettingsFoldout = EditorGUILayout.Foldout(settings.expertSettingsFoldout, "Expert Settings");
+            if (settings.expertSettingsFoldout)
             {
                 using (new QBEditorLayoutIndent())
                 {
@@ -124,8 +143,8 @@ namespace QuickBuild
 
         void	DrawExpertSettings()
         {
-            settings.AllowDebugging = EditorGUILayout.Toggle("Allow debugging", settings.AllowDebugging);
-            settings.LaunchInBatchMode = EditorGUILayout.Toggle(new GUIContent("Batchmode", "Launch in batchmode so there is no rendering (see command line arguments manual). Implies -nographics. Useful for server."), settings.LaunchInBatchMode);
+            settings.allowDebugging = EditorGUILayout.Toggle("Allow debugging", settings.allowDebugging);
+            settings.launchInBatchMode = EditorGUILayout.Toggle(new GUIContent("Batchmode", "Launch in batchmode so there is no rendering (see command line arguments manual). Implies -nographics. Useful for server."), settings.launchInBatchMode);
         }
     }
 

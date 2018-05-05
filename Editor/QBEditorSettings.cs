@@ -14,39 +14,39 @@ public class QBEditorSettings
     [System.Serializable]
     public class QBScrenSettings
     {
-        public bool	IsFullScreen = false;
-        public int ScreenWidth = 800;
-        public int ScreenHeight = 600;
+        public bool	isFullScreen = false;
+        public int screenWidth = 800;
+        public int screenHeight = 600;
     }
 
-    private int SettingsVersion = 1;
+    private int _settingsVersion = 1;
 
-    public int NumInstances = 1;
-    public bool BuildScriptsOnly = false;
+    public int numInstances = 1;
+    public bool buildScriptsOnly = false;
 
     #region Advanced Settings
-    public bool AdvancedSettingsFoldout = false;
-    public bool DisplayInstanceID = false;
-    public bool RedirectOutputLog = true;
-    public bool ScreenSettingsFoldout = false;
-    public QBScrenSettings ScreenSettings = new QBScrenSettings();
+    public bool advancedSettingsFoldout = false;
+    public bool displayInstanceID = false;
+    public bool redirectOutputLog = true;
+    public bool screenSettingsFoldout = false;
+    public QBScrenSettings screenSettings = new QBScrenSettings();
 
     public string BuildDirectoryPath
     {
         get
         {
-            if (_BuildDirectoryPath == null)
+            if (_buildDirectoryPath == null)
             {
                 InitializeBuildDirectoryPath();
             }
-            return (_BuildDirectoryPath);
+            return (_buildDirectoryPath);
         }
         set
         {
-            _BuildDirectoryPath = value;
+            _buildDirectoryPath = value;
         }
     }
-    public string _BuildDirectoryPath = null;
+    private string _buildDirectoryPath = null;
 
     public string ExecutablePath
     {
@@ -55,11 +55,13 @@ public class QBEditorSettings
             return (BuildDirectoryPath != null ? BuildDirectoryPath + "/" + ExecutableName : string.Empty);
         }
     }
+    
+    public QBInstanceData[] customInstanceDatas;
 
     #region Expert Settings
-    public bool ExpertSettingsFoldout = false;
-    public bool AllowDebugging = true;
-    public bool LaunchInBatchMode = false;
+    public bool expertSettingsFoldout = false;
+    public bool allowDebugging = true;
+    public bool launchInBatchMode = false;
     #endregion
 
     #endregion
@@ -83,61 +85,61 @@ public class QBEditorSettings
 
     public void InitializeBuildDirectoryPath()
     {
-        _BuildDirectoryPath = Path.GetDirectoryName(Application.dataPath) + "/" + DefaultBuildPath;
+        _buildDirectoryPath = Path.GetDirectoryName(Application.dataPath) + "/" + DefaultBuildPath;
     }
 
     public void	Save()
     {
-        EditorPrefs.SetInt(EKey_SettingsVersion, SettingsVersion);
+        EditorPrefs.SetInt(EKey_SettingsVersion, _settingsVersion);
 
-        EditorPrefs.SetInt(EKey_NumInstances, NumInstances);
-        EditorPrefs.SetBool(EKey_BuildScriptsOnly, BuildScriptsOnly);
+        EditorPrefs.SetInt(EKey_NumInstances, numInstances);
+        EditorPrefs.SetBool(EKey_BuildScriptsOnly, buildScriptsOnly);
 
-        EditorPrefs.SetBool(EKey_AdvancedSettingsFoldout, AdvancedSettingsFoldout);
-        EditorPrefs.SetBool(EKey_DisplayInstanceID, DisplayInstanceID);
-        EditorPrefs.SetBool(EKey_RedirectOutputLog, RedirectOutputLog);
+        EditorPrefs.SetBool(EKey_AdvancedSettingsFoldout, advancedSettingsFoldout);
+        EditorPrefs.SetBool(EKey_DisplayInstanceID, displayInstanceID);
+        EditorPrefs.SetBool(EKey_RedirectOutputLog, redirectOutputLog);
 
-        EditorPrefs.SetBool(EKey_ScreenSettingsFoldout, ScreenSettingsFoldout);
-        EditorPrefs.SetBool(EKey_IsFullScreen, ScreenSettings.IsFullScreen);
-        EditorPrefs.SetInt(EKey_ScreenWidth, ScreenSettings.ScreenWidth);
-        EditorPrefs.SetInt(EKey_ScreenHeight, ScreenSettings.ScreenHeight);
+        EditorPrefs.SetBool(EKey_ScreenSettingsFoldout, screenSettingsFoldout);
+        EditorPrefs.SetBool(EKey_IsFullScreen, screenSettings.isFullScreen);
+        EditorPrefs.SetInt(EKey_ScreenWidth, screenSettings.screenWidth);
+        EditorPrefs.SetInt(EKey_ScreenHeight, screenSettings.screenHeight);
           
         if (BuildDirectoryPath != null)
         {
             EditorPrefs.SetString(EKey_BuildDirectoryPath, BuildDirectoryPath);
         }
 
-        EditorPrefs.SetBool(EKey_ExpertSettingsFoldout, ExpertSettingsFoldout);
-        EditorPrefs.SetBool(EKey_AllowDebugging, AllowDebugging);
-        EditorPrefs.SetBool(EKey_LaunchInBatchMode, LaunchInBatchMode);
+        EditorPrefs.SetBool(EKey_ExpertSettingsFoldout, expertSettingsFoldout);
+        EditorPrefs.SetBool(EKey_AllowDebugging, allowDebugging);
+        EditorPrefs.SetBool(EKey_LaunchInBatchMode, launchInBatchMode);
     }
 
     public void	Load()
     { 
-        SettingsVersion = EditorPrefs.GetInt(EKey_SettingsVersion);
+        _settingsVersion = EditorPrefs.GetInt(EKey_SettingsVersion);
 
-        if (SettingsVersion == 1)
+        if (_settingsVersion == 1)
         {
-            NumInstances = EditorPrefs.GetInt(EKey_NumInstances);
-            BuildScriptsOnly = EditorPrefs.GetBool(EKey_BuildScriptsOnly);
+            numInstances = EditorPrefs.GetInt(EKey_NumInstances);
+            buildScriptsOnly = EditorPrefs.GetBool(EKey_BuildScriptsOnly);
 
-            AdvancedSettingsFoldout = EditorPrefs.GetBool(EKey_AdvancedSettingsFoldout);
-            DisplayInstanceID = EditorPrefs.GetBool(EKey_DisplayInstanceID);
-            RedirectOutputLog = EditorPrefs.GetBool(EKey_RedirectOutputLog);
+            advancedSettingsFoldout = EditorPrefs.GetBool(EKey_AdvancedSettingsFoldout);
+            displayInstanceID = EditorPrefs.GetBool(EKey_DisplayInstanceID);
+            redirectOutputLog = EditorPrefs.GetBool(EKey_RedirectOutputLog);
 
-            ScreenSettingsFoldout = EditorPrefs.GetBool(EKey_ScreenSettingsFoldout);
-            ScreenSettings.IsFullScreen = EditorPrefs.GetBool(EKey_IsFullScreen);
-            ScreenSettings.ScreenWidth = EditorPrefs.GetInt(EKey_ScreenWidth);
-            ScreenSettings.ScreenHeight = EditorPrefs.GetInt(EKey_ScreenHeight);
+            screenSettingsFoldout = EditorPrefs.GetBool(EKey_ScreenSettingsFoldout);
+            screenSettings.isFullScreen = EditorPrefs.GetBool(EKey_IsFullScreen);
+            screenSettings.screenWidth = EditorPrefs.GetInt(EKey_ScreenWidth);
+            screenSettings.screenHeight = EditorPrefs.GetInt(EKey_ScreenHeight);
 
             if (EditorPrefs.HasKey(EKey_BuildDirectoryPath))
             {
                 BuildDirectoryPath = EditorPrefs.GetString(EKey_BuildDirectoryPath);
             }
 
-            ExpertSettingsFoldout = EditorPrefs.GetBool(EKey_ExpertSettingsFoldout);
-            AllowDebugging = EditorPrefs.GetBool(EKey_AllowDebugging);
-            LaunchInBatchMode = EditorPrefs.GetBool(EKey_LaunchInBatchMode);
+            expertSettingsFoldout = EditorPrefs.GetBool(EKey_ExpertSettingsFoldout);
+            allowDebugging = EditorPrefs.GetBool(EKey_AllowDebugging);
+            launchInBatchMode = EditorPrefs.GetBool(EKey_LaunchInBatchMode);
         }
     }
 

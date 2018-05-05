@@ -106,12 +106,12 @@ namespace QuickBuild
             AddCommandLineArgument(sb, QBCommandLineParameters.EnableQuickBuild);
             AddCommandLineArgument(sb, QBCommandLineParameters.InstanceID, InstanceID);
              
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_FullscreenMode, EditorSettings.ScreenSettings.IsFullScreen ? 1 : 0); 
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Width, EditorSettings.ScreenSettings.ScreenWidth);
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Height, EditorSettings.ScreenSettings.ScreenHeight);
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_FullscreenMode, EditorSettings.screenSettings.isFullScreen ? 1 : 0); 
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Width, EditorSettings.screenSettings.screenWidth);
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Height, EditorSettings.screenSettings.screenHeight);
 
             string outputLogFileName = string.Empty;
-            if (!EditorSettings.RedirectOutputLog)
+            if (!EditorSettings.redirectOutputLog)
             {
                 outputLogFileName = EditorSettings.BuildDirectoryPath + "/" + string.Format(QBCommandLineParameters.LogFileFormat, InstanceID);
                 AddCommandLineArgument(sb, QBCommandLineParameters.LogFile, outputLogFileName);
@@ -121,13 +121,13 @@ namespace QuickBuild
                 AddCommandLineArgument(sb, QBCommandLineParameters.RedirectOutput);
             }
 
-            if (EditorSettings.LaunchInBatchMode)
+            if (EditorSettings.launchInBatchMode)
             {
                 AddCommandLineArgument(sb, QBCommandLineParameters.Batchmode);
                 AddCommandLineArgument(sb, QBCommandLineParameters.NoGraphics);
             }
 
-            if (EditorSettings.DisplayInstanceID)
+            if (EditorSettings.displayInstanceID)
             {
                 AddCommandLineArgument(sb, QBCommandLineParameters.DisplayInstanceID);
             }
