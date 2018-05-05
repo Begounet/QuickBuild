@@ -11,7 +11,8 @@ namespace QuickBuild
     {
         public class Settings
         {
-            public int InstanceID;
+            public int instanceID;
+            public string customName;
         }
 
 
@@ -35,7 +36,17 @@ namespace QuickBuild
             ParseInstanceIDCommandArgs();
             ParseRedirectOutputCommandArgs();
             ParseDisplayInstanceID();
+            ParseCustomName();
             ParseAdditiveScenes();
+        }
+
+        private static void ParseCustomName()
+        {
+            string customName;
+            if (FindCommandArgument(QBCommandLineParameters.CustomName, out customName))
+            {
+                settings.customName = customName;
+            }
         }
 
         static void ParseInstanceIDCommandArgs()
@@ -44,7 +55,7 @@ namespace QuickBuild
             int instanceID;
             if (FindCommandArgumentAsInt(QBCommandLineParameters.InstanceID, out instanceID))
             {
-                settings.InstanceID = instanceID;
+                settings.instanceID = instanceID;
             }
         }
 

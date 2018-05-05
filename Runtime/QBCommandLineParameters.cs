@@ -12,6 +12,7 @@ namespace QuickBuild
         public const string InstanceID = "-qbInstanceID";
         public const string DisplayInstanceID = "-qbDisplayInstanceID";
         public const string AdditiveScenes = "-qbAdditiveScenes";
+        public const string CustomName = "-qbCustomName";
 
         public const string Screen_FullscreenMode = "-screen-fullscreen";
         public const string Screen_Width = "-screen-width";

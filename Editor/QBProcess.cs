@@ -5,48 +5,68 @@ using System.Threading;
 using System.Diagnostics;
 using System;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace QuickBuild
 {
     public class QBProcess
     {
+#if UNITY_EDITOR_WIN
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		internal static extern bool SetWindowPos(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, int flags);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		internal static extern IntPtr GetForegroundWindow();
+#endif
+
         public event Action<QBProcess> OnProcessCompleted;
 
-        Thread thread;
-        Process process;
-        ProcessStartInfo processStartInfo;
-        int instanceID;
+        private Thread _thread;
+        private Process _process;
+        private ProcessStartInfo _processStartInfo;
+        private int _instanceID;
+        protected QBProfile _profile;
 
         private const string QBMessageFormatPrefix = "<b>[QB:{0}]</b> {1}";
         
-        public QBProcess(string BuildPath, QBEditorSettings EditorSettings, QBPlayerSettings PlayerSettings, int InstanceID)
+        public QBProcess(string buildPath, QBProfile editorProfile, QBPlayerSettings playerSettings, int instanceID)
         {
-            instanceID = InstanceID;
+            _instanceID = instanceID;
+            _profile = editorProfile;
 
-            processStartInfo = new ProcessStartInfo();
-            processStartInfo.UseShellExecute = false;
+            _processStartInfo = new ProcessStartInfo();
+            //_processStartInfo.UseShellExecute = false;
+			_processStartInfo.WindowStyle = ProcessWindowStyle.Normal;
 //			processStartInfo.RedirectStandardOutput = EditorSettings.RedirectOutputLog;
-            processStartInfo.FileName = BuildPath;
-            processStartInfo.Arguments = BuildCommandLineArguments(EditorSettings, PlayerSettings, InstanceID);
+            _processStartInfo.FileName = buildPath;
+            _processStartInfo.Arguments = BuildCommandLineArguments(editorProfile, playerSettings, instanceID);
 
-            UnityEngine.Debug.Log("Command line arguments : " + processStartInfo.Arguments);
+			UnityEngine.Debug.Log("Command line arguments : " + _processStartInfo.Arguments);
         }
 
         public void	Start()
         {
             Kill();
 
-            thread = new Thread(ProcessWorker);
-            thread.Start();
+            _thread = new Thread(ProcessWorker);
+            _thread.Start();
         }
 
         void ProcessWorker(object param)
         {
-            process = Process.Start(processStartInfo);
-//			process.EnableRaisingEvents = true;
-//			process.OutputDataReceived += HandleOutputDataReceived;
-//			process.Exited += HandleProcessExited;
-//			process.BeginOutputReadLine();
+            _process = Process.Start(_processStartInfo);
+            //			process.EnableRaisingEvents = true;
+            //			process.OutputDataReceived += HandleOutputDataReceived;
+            //			process.Exited += HandleProcessExited;
+            //			process.BeginOutputReadLine();
+
+			// Does not work for now... _process.MainWindowTitle is always invalid
+			_process.WaitForInputIdle();
+			_process.Refresh();
+            MoveProcessWindowIfRequired(_process);
         }
 
         void HandleOutputDataReceived (object sender, DataReceivedEventArgs e)
@@ -58,7 +78,7 @@ namespace QuickBuild
             if (QBMessagePacker.UnpackMessage(e.Data, out condition, out stackTrace, out logType))
             {
                 string messageContent = string.Format("{0}{1}<i>{2}</i>", condition, System.Environment.NewLine, stackTrace);
-                string message = string.Format(QBMessageFormatPrefix, instanceID, messageContent);
+                string message = string.Format(QBMessageFormatPrefix, _instanceID, messageContent);
                 switch (logType)
                 {
                     case LogType.Log:
@@ -76,44 +96,47 @@ namespace QuickBuild
             }
             else
             {
-                UnityEngine.Debug.Log(string.Format(QBMessageFormatPrefix, instanceID, e.Data));
+                UnityEngine.Debug.Log(string.Format(QBMessageFormatPrefix, _instanceID, e.Data));
             }
         }
 
         void HandleProcessExited (object sender, EventArgs e)
         {
-            process = null;
+            _process = null;
         }
 
         public void Kill()
         {
-            if (thread != null && thread.IsAlive)
+            if (_thread != null && _thread.IsAlive)
             {
-                thread.Abort();
-                thread = null;
+                _thread.Abort();
+                _thread = null;
             }
 
-            if (process != null)
+            if (_process != null)
             {
-                process.Kill();
+                _process.Kill();
             }
         }
 
-        private string	BuildCommandLineArguments(QBEditorSettings EditorSettings, QBPlayerSettings PlayerSettings, int InstanceID)
+        private string	BuildCommandLineArguments(QBProfile editorProfile, QBPlayerSettings playerSettings, int instanceID)
         {
             StringBuilder sb = new StringBuilder();
 
             AddCommandLineArgument(sb, QBCommandLineParameters.EnableQuickBuild);
-            AddCommandLineArgument(sb, QBCommandLineParameters.InstanceID, InstanceID);
+            AddCommandLineArgument(sb, QBCommandLineParameters.InstanceID, instanceID);
              
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_FullscreenMode, EditorSettings.ScreenSettings.IsFullScreen ? 1 : 0); 
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Width, EditorSettings.ScreenSettings.ScreenWidth);
-            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Height, EditorSettings.ScreenSettings.ScreenHeight);
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_FullscreenMode, editorProfile.advancedSettings.screenSettings.isFullScreen ? 1 : 0);
+
+            int width, height;
+            editorProfile.GetScreenSizeForInstance(instanceID, out width, out height);
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Width, width);
+            AddCommandLineArgument(sb, QBCommandLineParameters.Screen_Height, height);
 
             string outputLogFileName = string.Empty;
-            if (!EditorSettings.RedirectOutputLog)
+            if (!editorProfile.advancedSettings.redirectOutputLog)
             {
-                outputLogFileName = EditorSettings.BuildDirectoryPath + "/" + string.Format(QBCommandLineParameters.LogFileFormat, InstanceID);
+                outputLogFileName = editorProfile.BuildDirectoryPath + "/" + string.Format(QBCommandLineParameters.LogFileFormat, instanceID);
                 AddCommandLineArgument(sb, QBCommandLineParameters.LogFile, outputLogFileName);
             }
             else
@@ -121,22 +144,38 @@ namespace QuickBuild
                 AddCommandLineArgument(sb, QBCommandLineParameters.RedirectOutput);
             }
 
-            if (EditorSettings.LaunchInBatchMode)
+            if (editorProfile.expertSettings.launchInBatchMode)
             {
                 AddCommandLineArgument(sb, QBCommandLineParameters.Batchmode);
                 AddCommandLineArgument(sb, QBCommandLineParameters.NoGraphics);
             }
 
-            if (EditorSettings.DisplayInstanceID)
+            if (editorProfile.advancedSettings.displayInstanceID)
             {
                 AddCommandLineArgument(sb, QBCommandLineParameters.DisplayInstanceID);
             }
 
-            if (PlayerSettings.AdditiveScenes.Length > 0)
+
+            if (playerSettings.AdditiveScenes.Length > 0)
             {
-                AddCommandLineArgument(sb, QBCommandLineParameters.AdditiveScenes, QBCommandLineHelper.PackStringArray(PlayerSettings.AdditiveScenes));
+                AddCommandLineArgument(sb, QBCommandLineParameters.AdditiveScenes, QBCommandLineHelper.PackStringArray(playerSettings.AdditiveScenes));
             }
 
+            if (instanceID < editorProfile.expertSettings.customInstanceDatas.Length)
+            {
+                QBInstanceData qbInstanceData = editorProfile.expertSettings.customInstanceDatas[instanceID];
+                if (qbInstanceData)
+                {
+                    AddCommandLineArgument(sb, qbInstanceData.commandLineArguments);
+
+                    if (!string.IsNullOrEmpty(qbInstanceData.customName))
+                    {
+                        AddCommandLineArgument(sb, QBCommandLineParameters.CustomName, qbInstanceData.customName);
+                    }
+                }
+            }
+
+            AddCommandLineArgument(sb, editorProfile.advancedSettings.commandLineArguments);
             return (sb.ToString());
         }
 
@@ -149,7 +188,47 @@ namespace QuickBuild
         {
             AddCommandLineArgument(sb, string.Format("{0} {1}", key, value));
         }
+        
+        private void MoveProcessWindowIfRequired(Process process)
+        {
+			if (process.MainWindowHandle.ToInt32() == 0)
+			{
+				return;
+			}
 
+            QBInstanceData instanceData = _profile.GetInstanceData(_instanceID);
+            if (instanceData != null && instanceData.screenPosition.Override)
+            {
+#if UNITY_EDITOR_WIN
+                int width, height;
+                _profile.GetScreenSizeForInstance(_instanceID, out width, out height);
+				IntPtr id = GetForegroundWindow();
+
+				UnityEngine.Debug.LogFormat("Move window [{0}, {1}, {2}, {3}]", instanceData.screenPosition.X, instanceData.screenPosition.Y, width, height);
+//				bool repaint = true;
+//              QBProcess.MoveWindow(
+//                  id, 
+//                  instanceData.screenPosition.X, instanceData.screenPosition.Y,
+//                  width, height,
+//                  repaint
+//                  );
+
+				bool result = QBProcess.SetWindowPos(
+					id,
+					instanceData.screenPosition.X, instanceData.screenPosition.Y,
+					width, height,
+					0x0010 | 0x0200 | 0x0001 | 0x0004
+				);
+
+				UnityEngine.Debug.LogFormat("Move success : {0}", result);
+				if (!result)
+				{
+					int errorCode = Marshal.GetLastWin32Error();
+					UnityEngine.Debug.LogFormat("Error code : {0}", errorCode);
+				}
+#endif
+            }
+        }
     }
 
 }

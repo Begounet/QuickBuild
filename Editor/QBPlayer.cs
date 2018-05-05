@@ -15,9 +15,9 @@ namespace QuickBuild
             processes = new QBProcesses();
         }
 
-        public void	RunBuilds(QBEditorSettings Settings)
+        public void	RunBuilds(QBProfile profile)
         {
-            processes.StartNewProcess(Settings.ExecutablePath, Settings, GeneratePlayerSettings(), Settings.NumInstances);
+            processes.StartNewProcess(profile.ExecutablePath, profile, GeneratePlayerSettings(), profile.numberOfInstances);
         }
 
         QBPlayerSettings	GeneratePlayerSettings()
