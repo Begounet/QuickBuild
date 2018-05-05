@@ -63,6 +63,7 @@ namespace QuickBuild
             [Tooltip("If true, the instance will be in 'batchmode' and won't have any graphics. Equivalent of '-batchmode -nographics'")]
             public bool launchInBatchMode = false;
 
+			[Tooltip("Allow to use custom settings for each instance started")]
             public QBInstanceData[] customInstanceDatas;
         }
 
@@ -71,6 +72,8 @@ namespace QuickBuild
         {
             [Tooltip("Should the instance ID displayed in the build?")]
             public bool displayInstanceID = false;
+
+            [Tooltip("Not working for now. You can still connect via the console to get logs.")]
             public bool redirectOutputLog = true;
             public QBScrenSettings screenSettings;
 
@@ -85,6 +88,31 @@ namespace QuickBuild
         public ExpertSettings expertSettings
         {
             get { return advancedSettings.expertSettings; }
+        }
+
+
+        public QBInstanceData  GetInstanceData(int instanceID)
+        {
+            if (instanceID < expertSettings.customInstanceDatas.Length)
+            {
+                return (expertSettings.customInstanceDatas[instanceID]);
+            }
+            return (null);
+        }
+        
+        public void GetScreenSizeForInstance(int instanceID, out int width, out int height)
+        {
+            QBInstanceData instanceData = GetInstanceData(instanceID);
+            if (instanceData != null && instanceData.screenSize.Override)
+            {
+                width = instanceData.screenSize.Width;
+                height = instanceData.screenSize.Height;
+            }
+            else
+            {
+                width = advancedSettings.screenSettings.screenWidth;
+                height = advancedSettings.screenSettings.screenHeight;
+            }
         }
     }
 }
