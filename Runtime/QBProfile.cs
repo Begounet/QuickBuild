@@ -74,6 +74,9 @@ namespace QuickBuild
             public bool redirectOutputLog = true;
             public QBScrenSettings screenSettings;
 
+            [Tooltip("Allow to add custom command line arguments to all instances started.")]
+            public string commandLineArguments;
+
             public ExpertSettings expertSettings;
         }
 

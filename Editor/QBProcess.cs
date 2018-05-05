@@ -132,11 +132,27 @@ namespace QuickBuild
                 AddCommandLineArgument(sb, QBCommandLineParameters.DisplayInstanceID);
             }
 
+
             if (playerSettings.AdditiveScenes.Length > 0)
             {
                 AddCommandLineArgument(sb, QBCommandLineParameters.AdditiveScenes, QBCommandLineHelper.PackStringArray(playerSettings.AdditiveScenes));
             }
 
+            if (instanceID < editorProfile.expertSettings.customInstanceDatas.Length)
+            {
+                QBInstanceData qbInstanceData = editorProfile.expertSettings.customInstanceDatas[instanceID];
+                if (qbInstanceData)
+                {
+                    AddCommandLineArgument(sb, qbInstanceData.commandLineArguments);
+
+                    if (!string.IsNullOrEmpty(qbInstanceData.customName))
+                    {
+                        AddCommandLineArgument(sb, QBCommandLineParameters.CustomName, qbInstanceData.customName);
+                    }
+                }
+            }
+
+            AddCommandLineArgument(sb, editorProfile.advancedSettings.commandLineArguments);
             return (sb.ToString());
         }
 

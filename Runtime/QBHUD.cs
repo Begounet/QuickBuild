@@ -13,6 +13,14 @@ public class QBHUD : MonoBehaviour
     void OnGUI()
     {
         GUI.color = Color.red;
-        GUI.Label(new Rect(10, 10, 100, 20), string.Format("QB ID[{0}]", QuickBuild.QBSettingsLoader.settings.InstanceID));
+
+        string instanceName = string.Format("QB ID[{0}]", QuickBuild.QBSettingsLoader.settings.instanceID);
+        string customName = QuickBuild.QBSettingsLoader.settings.customName;
+        if (!string.IsNullOrEmpty(customName))
+        {
+            instanceName += " " + customName;
+        }
+
+        GUI.Label(new Rect(10, 10, Screen.width, 20), instanceName);
     }
 }
