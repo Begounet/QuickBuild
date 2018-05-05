@@ -15,25 +15,25 @@ using UnityEditor;
 /// </summary>
 public class QBBuildSettingsPreserveContext : IDisposable
 {
-	bool	playerSettings_RunInBackground;
+    bool	playerSettings_RunInBackground;
 
-	ResolutionDialogSetting playerSettings_DisplayResolutionDialog;
+    ResolutionDialogSetting playerSettings_DisplayResolutionDialog;
 
-	EditorBuildSettingsScene[]	editorBuildSettingsScenes;
+    EditorBuildSettingsScene[]	editorBuildSettingsScenes;
 
-	public QBBuildSettingsPreserveContext()
-	{
-		playerSettings_RunInBackground = PlayerSettings.runInBackground;
-		playerSettings_DisplayResolutionDialog = PlayerSettings.displayResolutionDialog;
-		editorBuildSettingsScenes = EditorBuildSettings.scenes;
-	}
+    public QBBuildSettingsPreserveContext()
+    {
+        playerSettings_RunInBackground = PlayerSettings.runInBackground;
+        playerSettings_DisplayResolutionDialog = PlayerSettings.displayResolutionDialog;
+        editorBuildSettingsScenes = EditorBuildSettings.scenes;
+    }
 
-	#region IDisposable implementation
-	public void Dispose()
-	{
-		PlayerSettings.runInBackground = playerSettings_RunInBackground;
-		PlayerSettings.displayResolutionDialog = playerSettings_DisplayResolutionDialog;
-		EditorBuildSettings.scenes = editorBuildSettingsScenes;
-	}
-	#endregion
+    #region IDisposable implementation
+    public void Dispose()
+    {
+        PlayerSettings.runInBackground = playerSettings_RunInBackground;
+        PlayerSettings.displayResolutionDialog = playerSettings_DisplayResolutionDialog;
+        EditorBuildSettings.scenes = editorBuildSettingsScenes;
+    }
+    #endregion
 }

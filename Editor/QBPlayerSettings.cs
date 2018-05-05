@@ -5,9 +5,9 @@ using UnityEngine;
 namespace QuickBuild
 {
 
-	public class QBPlayerSettings
-	{
-		public string[]	AdditiveScenes;
-	}
+    public class QBPlayerSettings
+    {
+        public string[]	AdditiveScenes;
+    }
 
 }
