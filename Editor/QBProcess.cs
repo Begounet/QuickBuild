@@ -57,16 +57,16 @@ namespace QuickBuild
 
         void ProcessWorker(object param)
         {
-            _process = Process.Start(_processStartInfo);
+            Process.Start(_processStartInfo);
             //			process.EnableRaisingEvents = true;
             //			process.OutputDataReceived += HandleOutputDataReceived;
             //			process.Exited += HandleProcessExited;
             //			process.BeginOutputReadLine();
 
 			// Does not work for now... _process.MainWindowTitle is always invalid
-			_process.WaitForInputIdle();
-			_process.Refresh();
-            MoveProcessWindowIfRequired(_process);
+			//_process.WaitForInputIdle();
+			//_process.Refresh();
+            //MoveProcessWindowIfRequired(_process);
         }
 
         void HandleOutputDataReceived (object sender, DataReceivedEventArgs e)

@@ -28,7 +28,7 @@ namespace QuickBuild
         {
             get
             {
-                if (_buildDirectoryPath == null)
+                if (string.IsNullOrEmpty(_buildDirectoryPath))
                 {
                     _buildDirectoryPath = Path.GetDirectoryName(Application.dataPath) + "/" + buildPath;
                 }
@@ -44,7 +44,7 @@ namespace QuickBuild
         {
             get
             {
-                return (BuildDirectoryPath != null ? BuildDirectoryPath + "/" + ExecutableName : string.Empty);
+                return (BuildDirectoryPath + "/" + ExecutableName);
             }
         }
 
